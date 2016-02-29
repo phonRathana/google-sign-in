@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+var SCOPE_STRING = 'https://www.googleapis.com/auth/drive.readonly';
+
  /**
   * Trigger authentication using Google Sign-In then authenticate with the
   * server, apply profile change.
@@ -25,7 +27,6 @@ app.signIn = function() {
 
   // Sign-In
   auth2.signIn()
-  .then(authenticateWithServer)
   .then(changeProfile, function(error) {
     app.fire('show-toast', {
       text: 'Authentication failed.'
@@ -43,39 +44,6 @@ app.signOut = function() {
   // Sign-Out
   auth2.signOut()
   .then(changeProfile);
-};
-
-/**
- * Authenticate user by sending id_token to the server
- * @param  {GoogleUser} googleUser GoogleUser object obtained upon
- *                                 successful authentication
- * @return {Promise} Resolves when server successfully verifies
- *                            received id_token
- */
-var authenticateWithServer = function(googleUser) {
-  return new Promise(function(resolve) {
-    // Using `FormData` as it is handy to use with POST
-    var form = new FormData();
-    if (!idToken) {
-      throw 'Authentication failed.';
-    }
-    form.append('id_token', idToken);
-
-    // Using `fetch` to POST `id_token`
-    // You can of course use XHR
-    return fetch('/validate', {
-      method: 'POST',
-      body: form,
-      credentials: 'include'
-    }).then(function(resp) {
-      // When POST succeeded
-      if (resp.status === 200) {
-        resolve(googleUser);
-      } else {
-        throw 'Authentication failed.';
-      }
-    });
-  });
 };
 
 /**
@@ -168,11 +136,10 @@ gapi.load('auth2', function() {
   gapi.auth2.init().then(function(auth2) {
     // If the user is already signed in
     if (auth2.isSignedIn.get()) {
+      var googleUser = auth2.currentUser.get();
+
       // Change user's profile information
-      authenticateWithServer(googleUser)
-      .then(function(googleUser) {
-        changeProfile(googleUser);
-      });
+      changeProfile(googleUser);
     }
   });
 });

@@ -56,7 +56,7 @@ var authenticateWithServer = function(googleUser) {
   return new Promise(function(resolve) {
     // Using `FormData` as it is handy to use with POST
     var form = new FormData();
-    var idToken = googleUser.getAuthResponse();
+    var idToken = googleUser.getAuthResponse().id_token;
     if (!idToken) {
       throw 'Authentication failed.';
     }

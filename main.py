@@ -19,18 +19,12 @@ vendor.add('lib')
 
 import json
 
-from flask import Flask
-from flask import render_template
-from flask import session
-from flask import request
-from flask import make_response
-
-from apiclient.discovery import build
+from flask import Flask, request, make_response, render_template, session
 from oauth2client import client, crypt
+from apiclient.discovery import build
 import httplib2
 
 from google.appengine.ext import ndb
-
 
 app = Flask(
     __name__,
@@ -38,15 +32,17 @@ app = Flask(
     static_folder='static',
     template_folder='templates'
 )
-app.config.update(
-    SESSION_COOKIE_HTTPONLY=False,
-    SESSION_COOKIE_PATH='/'
-)
 app.debug = True
 
 CLIENT_ID = json.loads(open('client_secrets.json',
                             'r').read())['web']['client_id']
-app.secret_key = 'abcde'
+
+# On this sample, this is not really a secret
+# Make sure to change SECRET_KEY for your own purposes
+SECRET_KEY = 'abcde'
+app.config.update(
+    SECRET_KEY=SECRET_KEY
+)
 
 
 class CredentialStore(ndb.Model):
@@ -60,7 +56,7 @@ class CredentialStore(ndb.Model):
 
 @app.route('/')
 def index():
-    mode = request.args.get('mode', '')
+    mode = request.args.get('mode', 'introduction')
     # Sanitize `mode` parameter
     if mode not in {'introduction',
                     'authentication_with_backends',
@@ -103,7 +99,14 @@ def validate():
         return make_response('Wrong Issuer.', 401)
 
     sub = idinfo['sub']
-    store = CredentialStore(id=sub, id_token=idinfo)
+    store = CredentialStore.get_by_id(sub)
+    if store is None:
+        # If the user doesn't exist
+        store = CredentialStore(id=sub, id_token=idinfo)
+    else:
+        # If the user already exists
+        store.id_token = idinfo
+
     store.put()
 
     session['id'] = sub
@@ -114,16 +117,24 @@ def validate():
 @app.route('/code', methods=['POST'])
 def code():
     code = request.form.get('code', '')
-    try:
-        credentials = client.credentials_from_clientsecrets_and_code(
-            'client_secrets.json', scope='', code=code)
+    credentials = client.credentials_from_clientsecrets_and_code(
+        'client_secrets.json', scope='', code=code)
 
-        sub = credentials.id_token['sub']
-        store = CredentialStore.get_by_id(sub)
-        store.credentials = credentials.to_json()
-        store.put()
+    if credentials is None:
+        # Couldn't obtain the credential object
+        return make_response('Invalid authorization code.', 401)
 
-    except crypt.AppIdentityError:
-        return make_response('Authorization failed.', 401)
+    sub = credentials.id_token['sub']
+    store = CredentialStore.get_by_id(sub)
+
+    if store is None:
+        # id_token not stored
+        return make_response('Authorization before authentication.', 401)
+        # Just chose not to authenticate at the same time here because
+        # Google recommendation is to separate AuthN and AuthZ.
+        # But you could optionally do so if it makes sense.
+
+    store.credentials = credentials.to_json()
+    store.put()
 
     return make_response('', 200)

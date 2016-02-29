@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-var SCOPE_STRING = 'https://www.googleapis.com/auth/drive.readonly';
-
 // This sample code is depending on Polymer
 // But most of code can be independent
 var app = document.querySelector('#app');

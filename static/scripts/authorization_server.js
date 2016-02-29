@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+var SCOPE_STRING = 'https://www.googleapis.com/auth/drive.readonly';
+
  /**
   * Trigger authentication using Google Sign-In then authenticate with the
   * server, apply profile change.
@@ -56,6 +58,7 @@ var authenticateWithServer = function(googleUser) {
   return new Promise(function(resolve) {
     // Using `FormData` as it is handy to use with POST
     var form = new FormData();
+    var idToken = googleUser.getAuthResponse().id_token;
     if (!idToken) {
       throw 'Authentication failed.';
     }
@@ -158,9 +161,6 @@ app.authorize = function() {
           text: 'Authentication failed.'
         });
       });
-
-      // Make API call
-      accessDrive();
     });
   }
 };
@@ -200,11 +200,12 @@ gapi.load('auth2', function() {
   .then(function(auth2) {
     // If the user is already signed in
     if (auth2.isSignedIn.get()) {
+      var googleUser = auth2.currentUser.get();
+
       // Change user's profile information
       authenticateWithServer(googleUser)
-      .then(function(googleUser) {
-        changeProfile(googleUser);
-      });
+      // Change user's profile information
+      .then(changeProfile);
     }
   });
 });
