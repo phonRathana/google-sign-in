@@ -20,7 +20,7 @@ vendor.add('lib')
 import json
 
 from flask import Flask, request, make_response, render_template, session
-from oauth2client import client, crypt
+from oauth2client import client
 from apiclient.discovery import build
 import httplib2
 
@@ -45,6 +45,7 @@ app.config.update(
 )
 
 
+# App Engine Datastore to save credentials
 class CredentialStore(ndb.Model):
     id_token = ndb.JsonProperty()
     credentials = ndb.JsonProperty()
@@ -69,46 +70,63 @@ def index():
 
 @app.route('/api')
 def api():
+    # If session doesn't include `id`, the user is not signed in
     if 'id' not in session:
         return make_response('Not authenticated', 401)
 
+    # Extract user id from session
     sub = session.get('id')
+    # Obtain Datastore entry by user id
     store = CredentialStore.get_by_id(sub)
 
+    # If the store doesn't include `credentials`, user is not authorized
     if store.credentials is None:
         # Not authorized for offline use
         return make_response('access_token not stored', 401)
 
+    # Deserialize the credential object
     credentials = client.Credentials.new_from_json(store.credentials)
     http = credentials.authorize(httplib2.Http())
     drive = build('drive', 'v3', http=http)
     files = drive.files().list(fields='files').execute()
 
+    # Respond with list of files from Google Drive
     return make_response(json.dumps(files.get('files', [])), 200)
 
 
 @app.route('/validate', methods=['POST'])
 def validate():
+    # POST should include `id_token`
     id_token = request.form.get('id_token', '')
+
+    # Verify the `id_token` using API Client Library
     idinfo = client.verify_id_token(id_token, CLIENT_ID)
 
+    # Additional verification: See if `aud` matches CLIENT_ID
     if idinfo['aud'] != CLIENT_ID:
         return make_response('Wrong Audience.', 401)
+    # Additional verification: See if `iss` matches Google issuer string
     if idinfo['iss'] not in ['accounts.google.com',
                              'https://accounts.google.com']:
         return make_response('Wrong Issuer.', 401)
 
+    # Extract user id from `id_token`'s content
     sub = idinfo['sub']
+    # Obtain Datastore entry by user id
     store = CredentialStore.get_by_id(sub)
+
+    # If the store is `None`, the user hasn't previously signed-in
     if store is None:
-        # If the user doesn't exist
+        # Create a new store
         store = CredentialStore(id=sub, id_token=idinfo)
     else:
-        # If the user already exists
+        # Append `id_token` entry
         store.id_token = idinfo
 
+    # Save the store
     store.put()
 
+    # Start a session
     session['id'] = sub
 
     return make_response('', 200)
@@ -116,24 +134,30 @@ def validate():
 
 @app.route('/code', methods=['POST'])
 def code():
+    # POST should include `code`
     code = request.form.get('code', '')
+    # Exchange the `code` with credential information
     credentials = client.credentials_from_clientsecrets_and_code(
         'client_secrets.json', scope='', code=code)
 
+    # If the credential is `None`
     if credentials is None:
-        # Couldn't obtain the credential object
+        # Means it failed to obtain the credential object
         return make_response('Invalid authorization code.', 401)
 
+    # Extract user id from `id_token`'s content
     sub = credentials.id_token['sub']
+    # Obtain Datastore entry by user id
     store = CredentialStore.get_by_id(sub)
 
+    # If the store is `None`, the user hasn't previously signed-in
     if store is None:
-        # id_token not stored
         return make_response('Authorization before authentication.', 401)
-        # Just chose not to authenticate at the same time here because
-        # Google recommendation is to separate AuthN and AuthZ.
-        # But you could optionally do so if it makes sense.
+        # You could optionally authenticate if it makes sense.
+        # Just chose not to do so here because Google recommendation is
+        # to separate AuthN and AuthZ.
 
+    # Serialize the credential object and save
     store.credentials = credentials.to_json()
     store.put()
 
