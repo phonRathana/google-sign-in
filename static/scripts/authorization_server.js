@@ -43,8 +43,21 @@ app.signOut = function() {
   var auth2 = gapi.auth2.getAuthInstance();
 
   // Sign-Out
-  auth2.signOut()
-  .then(changeProfile);
+  fetch('/signout', {
+    method: 'POST',
+    credentials: 'include'
+  }).then(function(resp) {
+    if (resp.status === 200) {
+      auth2.signOut()
+      .then(changeProfile);
+    } else {
+      throw "Couldn't sign out";
+    }
+  }).catch(function(error) {
+    app.fire('show-toast', {
+      text: error
+    });
+  });
 };
 
 /**

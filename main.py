@@ -18,6 +18,8 @@ from google.appengine.ext import vendor
 vendor.add('lib')
 
 import json
+import sys
+import os
 
 from flask import Flask, request, make_response, render_template, session
 from oauth2client import client
@@ -33,6 +35,9 @@ app = Flask(
     template_folder='templates'
 )
 app.debug = True
+
+if os.path.isfile('client_secrets.json') is False:
+    sys.exit('client_secrets.json not found.')
 
 CLIENT_ID = json.loads(open('client_secrets.json',
                             'r').read())['web']['client_id']
@@ -90,6 +95,12 @@ def api():
     drive = build('drive', 'v3', http=http)
     files = drive.files().list(fields='files').execute()
 
+    # API Client Library takes care of refreshing access token behind
+    # the scenese. Store the Credential Object in case access_token is
+    # replaced with a new one.
+    store.credentials = credentials.to_json()
+    store.put()
+
     # Respond with list of files from Google Drive
     return make_response(json.dumps(files.get('files', [])), 200)
 
@@ -99,12 +110,18 @@ def validate():
     # POST should include `id_token`
     id_token = request.form.get('id_token', '')
 
+    # In order to validate the user, check if
+    # - the id_token contains valid JWT signature
+    # - `aud` matches the client id
+    # - `exp` timestamp doesn't exceed current time
+    # - `iss` matches with 'accounts.google.com'
+    #                   or 'https://accounts.google.com'
+    # - also, check `hd` if applicable
+
     # Verify the `id_token` using API Client Library
+    # This library covers checking signature, aud, exp.
     idinfo = client.verify_id_token(id_token, CLIENT_ID)
 
-    # Additional verification: See if `aud` matches CLIENT_ID
-    if idinfo['aud'] != CLIENT_ID:
-        return make_response('Wrong Audience.', 401)
     # Additional verification: See if `iss` matches Google issuer string
     if idinfo['iss'] not in ['accounts.google.com',
                              'https://accounts.google.com']:
@@ -134,6 +151,12 @@ def validate():
 
 @app.route('/code', methods=['POST'])
 def code():
+    # If session doesn't include `id`, the user is not signed in
+    if 'id' not in session:
+        return make_response('Not authenticated', 401)
+
+    user_id = session.get('id', None)
+
     # POST should include `code`
     code = request.form.get('code', '')
     # Exchange the `code` with credential information
@@ -147,6 +170,12 @@ def code():
 
     # Extract user id from `id_token`'s content
     sub = credentials.id_token['sub']
+
+    # If the requesting user id doesn't match with the signed-in user id
+    if user_id != sub:
+        # Reject
+        return make_response("User doesn't match", 401)
+
     # Obtain Datastore entry by user id
     store = CredentialStore.get_by_id(sub)
 
@@ -160,5 +189,11 @@ def code():
     # Serialize the credential object and save
     store.credentials = credentials.to_json()
     store.put()
+
+    return make_response('', 200)
+
+@app.route('/signout', methods=['POST'])
+def signout():
+    session.pop('id', None)
 
     return make_response('', 200)

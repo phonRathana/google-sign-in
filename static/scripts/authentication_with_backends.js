@@ -30,6 +30,10 @@ app.signIn = function() {
     app.fire('show-toast', {
       text: 'Authentication failed.'
     });
+  }).catch(function(error) {
+    app.fire('show-toast', {
+      text: error
+    });
   });
 };
 
@@ -41,8 +45,21 @@ app.signOut = function() {
   var auth2 = gapi.auth2.getAuthInstance();
 
   // Sign-Out
-  auth2.signOut()
-  .then(changeProfile);
+  fetch('/signout', {
+    method: 'POST',
+    credentials: 'include'
+  }).then(function(resp) {
+    if (resp.status === 200) {
+      auth2.signOut()
+      .then(changeProfile);
+    } else {
+      throw "Couldn't sign out";
+    }
+  }).catch(function(error) {
+    app.fire('show-toast', {
+      text: error
+    });
+  });
 };
 
 /**
@@ -125,7 +142,12 @@ gapi.load('auth2', function() {
       // Authenticate with server
       authenticateWithServer(googleUser)
       // Change user's profile information
-      .then(changeProfile);
+      .then(changeProfile)
+      .catch(function(error) {
+        app.fire('show-toast', {
+          text: error
+        });
+      });
     }
   });
 });
