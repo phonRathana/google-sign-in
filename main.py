@@ -117,6 +117,8 @@ def validate():
     # - `iss` matches with 'accounts.google.com'
     #                   or 'https://accounts.google.com'
     # - also, check `hd` if applicable
+    # Failure to properly validate the id_token
+    # could **open your app to attack**.
 
     # Verify the `id_token` using API Client Library
     # This library covers checking signature, aud, exp.
@@ -192,8 +194,10 @@ def code():
 
     return make_response('', 200)
 
+
 @app.route('/signout', methods=['POST'])
 def signout():
+    # Terminate sessions
     session.pop('id', None)
 
     return make_response('', 200)
