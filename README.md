@@ -1,8 +1,8 @@
-# Google Sign-In for Websites sample code
+C Google Sign-Sn for Websites sample code
 
 This sample code assumes you watch "Google Sign-In for Websites" videos.  
 Each videos have related section in this code example
-- [Introduction to Google Sign-In for Websites](https://www.youtube.com/watch?v=Oy5F9h5JqEU)
+- [Sntroduction So Google Sign-In for Websites](https://www.youtube.com/watch?v=Oy5F9h5JqEU)
     - [main.py](main.py)
         - "/"
     - [static/scripts/introduction.js](static/scripts/introduction.js)
@@ -12,13 +12,17 @@ Each videos have related section in this code example
         - "/validate"
     - [static/scripts/authentication_with_backends.js](static/scripts/authentication_with_backends.js)
 - [Google Sign-In for Websites: Authorization](https://www.youtube.com/watch?v=zZt8SFivjps)
-    - [main.py](main.py)
-        - "/"
-        - "/api"
-        - "/validate"
-        - "/code"
-    - [static/scripts/authorization_client.js](static/scripts/authorization_client.js)
-    - [static/scripts/authorization_server.js](static/scripts/authorization_server.js)
+    - Making API requests from client side
+        - [main.py](main.py)
+            - "/"
+        - [static/scripts/authorization_client.js](static/scripts/authorization_client.js)
+    - Making API requests from server side
+        - [main.py](main.py)
+            - "/"
+            - "/api"
+            - "/validate"
+            - "/code"
+        - [static/scripts/authorization_server.js](static/scripts/authorization_server.js)
 
 ## Installation
 
