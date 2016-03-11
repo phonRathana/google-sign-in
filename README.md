@@ -2,7 +2,7 @@
 
 This sample code assumes you watch "Google Sign-In for Websites" videos.  
 Each videos have related section in this code example
-- [Introduction So Google Sign-In for Websites](https://www.youtube.com/watch?v=Oy5F9h5JqEU)
+- [Introduction to Google Sign-In for Websites](https://www.youtube.com/watch?v=Oy5F9h5JqEU)
     - [main.py](main.py)
         - "/"
     - [static/scripts/introduction.js](static/scripts/introduction.js)
