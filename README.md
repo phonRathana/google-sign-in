@@ -1,4 +1,4 @@
-C Google Sign-Sn for Websites sample code
+C Google Sign-In for Websites sample code
 
 This sample code assumes you watch "Google Sign-In for Websites" videos.  
 Each videos have related section in this code example
