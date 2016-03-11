@@ -2,16 +2,16 @@
 
 This sample code assumes you watch "Google Sign-In for Websites" videos.  
 Each videos have related section in this code example
-- [Introduction to Google Sign-In for Websites]()
+- [Introduction to Google Sign-In for Websites](https://www.youtube.com/watch?v=Oy5F9h5JqEU)
     - [main.py](main.py)
         - "/"
     - [static/scripts/introduction.js](static/scripts/introduction.js)
-- [Google Sign-In for Websites: Authentication with backends]()
+- [Google Sign-In for Websites: Authentication with backends](https://www.youtube.com/watch?v=j_31hJtWjlw)
     - [main.py](main.py)
         - "/"
         - "/validate"
     - [static/scripts/authentication_with_backends.js](static/scripts/authentication_with_backends.js)
-- [Google Sign-In for Websites: Authorization]()
+- [Google Sign-In for Websites: Authorization](https://www.youtube.com/watch?v=zZt8SFivjps)
     - [main.py](main.py)
         - "/"
         - "/api"
