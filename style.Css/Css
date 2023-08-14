@@ -1,0 +1,59 @@
+body {
+ padding:0px;
+ margin:0;
+ background-color:#f4f4f4;
+ background-image: none;
+ background-attachment: fixed;
+ border: #f4f4f4;
+}
+ #image {
+ width: 100px;
+ height: 100px;
+ margin: auto;
+ margin-top: auto;
+ margin: square ;
+ }
+ #h {
+ width: 20px;
+height: 20px;
+margin-top: auto;
+margin-left: square;
+ }
+ url {
+ scroll-margin: Auto ;
+ scroll-margin: square ;
+ width: 25px;
+ height: 20px;
+ }
+ #p {
+ margin: square ;
+ height: 30px;
+ white-space: 300px;
+}
+  #My.profiles.logo.img {
+   width: 100px;
+   height: 100px;
+   margin: square;
+   stroke-width: 0%;
+}
+  #url.image {
+    width: 100%;
+    height: 100%;
+    margin: square; 
+}
+ #profiles.img.logo {
+   width: 100px;
+   height: 100px;
+   margin-top: auto;
+   margin-left: 0cqmax;
+   background-color: blanchedalmond #f4f4f4;
+   background-size: contain;
+ }
+ #img.src profile.imageUrl {
+    width : 100px;
+    height: 100px;
+    display: block;
+    direction: 30px;
+    margin: square;
+ }
+  
