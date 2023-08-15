@@ -6,6 +6,15 @@ body {
  background-attachment: fixed;
  border: #f4f4f4;
 }
+/*profiles.imag.logo* {
+#My.photo h1{
+  min-height:300px;
+  background:url('../img/profiles.jpeg') no-repeat;
+  background-position: center;
+  background-size: cover;
+  text-align:center;
+  color:#ffffff;
+}
  #image {
  width: 100px;
  height: 100px;
@@ -22,8 +31,8 @@ margin-left: square;
  url {
  scroll-margin: Auto ;
  scroll-margin: square ;
- width: 25px;
- height: 20px;
+ width: 0%px;
+ height: 0%px;
  }
  #p {
  margin: square ;
