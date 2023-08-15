@@ -41,7 +41,7 @@ margin-left: square;
     height: 100%;
     margin: square; 
 }
- #profiles.img.logo {
+ #profiles.imag.logo {
    width: 100px;
    height: 100px;
    margin-top: auto;
@@ -49,7 +49,7 @@ margin-left: square;
    background-color: blanchedalmond #f4f4f4;
    background-size: contain;
  }
- #img.src profile.imageUrl {
+ #image.profile. {
     width : 100px;
     height: 100px;
     display: block;
